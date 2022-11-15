@@ -1,109 +1,138 @@
-<p align="center">
-  <a href="https://kitemetric.com/" target="blank">Kite Metric</a>
-</p>
+# NestJS REST API boilerplate 🇺🇦
 
-# Kite Metric Group Order
+## Description
 
-Bring the benefits to your team by Group Order via easy, fast, and trackable.
+NestJS REST API boilerplate for typical project
 
-## Installation
+## Table of Contents
+
+- [Features](#features)
+- [Quick run](#quick-run)
+- [Comfortable development](#comfortable-development)
+- [Links](#links)
+- [Automatic update of dependencies](#automatic-update-of-dependencies)
+- [Database utils](#database-utils)
+- [Tests](#tests)
+
+## Features
+
+- [x] Database ([typeorm](https://www.npmjs.com/package/typeorm)).
+- [x] Seeding.
+- [x] Config Service ([@nestjs/config](https://www.npmjs.com/package/@nestjs/config)).
+- [x] Mailing ([nodemailer](https://www.npmjs.com/package/nodemailer), [@nestjs-modules/mailer](https://www.npmjs.com/package/@nestjs-modules/mailer)).
+- [x] Sign in and sign up via email.
+- [x] Social sign in (Apple, Facebook, Google, Twitter).
+- [x] Admin and User roles.
+- [x] I18N ([nestjs-i18n](https://www.npmjs.com/package/nestjs-i18n)).
+- [x] File uploads. Support local and Amazon S3 drivers.
+- [x] Swagger.
+- [x] E2E and units tests.
+- [x] Docker.
+- [x] CI (Github Actions).
+
+## Quick run
 
 ```bash
-$ npm install
+git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
+cd my-app/
+cp env-example .env
+docker compose up -d
 ```
 
-## Running the app
+For check status run
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose logs
 ```
 
-## Test
+## Comfortable development
+
+```bash
+git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
+cd my-app/
+cp env-example .env
+```
+
+Change `DATABASE_HOST=postgres` to `DATABASE_HOST=localhost`
+
+Change `MAIL_HOST=maildev` to `MAIL_HOST=localhost`
+
+Run additional container:
+
+```bash
+docker compose up -d postgres adminer maildev redis
+```
+
+```bash
+npm install
+
+npm run migration:run
+
+npm run seed:run
+
+npm run start:dev
+```
+
+## Links
+
+- Swagger: http://localhost:3000/docs
+- Adminer (client for DB): http://localhost:8080
+- Maildev: http://localhost:1080
+
+## Automatic update of dependencies
+
+If you want to automatically update dependencies, you can connect [Renovate](https://github.com/marketplace/renovate) for your project.
+
+## Database utils
+
+Generate migration
+
+```bash
+npm run migration:generate -- src/database/migrations/CreateNameTable 
+```
+
+Run migration
+
+```bash
+npm run migration:run
+```
+
+Revert migration
+
+```bash
+npm run migration:revert
+```
+
+Drop all tables in database
+
+```bash
+npm run schema:drop
+```
+
+Run seed
+
+```bash
+npm run seed:run
+```
+
+## Tests
 
 ```bash
 # unit tests
-$ npm run test
+npm run test
 
 # e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test:e2e
 ```
 
-## Swagger API docs
+## Tests in Docker
 
-[Swagger](https://github.com/nestjs/swagger) docs will be available at
-http://localhost:3000/documentation
-
-## Reference
-
-The project has clone from the boilerplate
-[iMichaelOwolabi/google-oauth-nestjs](https://github.com/iMichaelOwolabi/google-oauth-nestjs)
-
-### Debug with VS Code
-
-At the project directory, start VS Code. Create .vscode/launch.json as below:
-
-```
-// ./.vscode/launch.json
-
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Launch npm start:debug",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["start", "debug"]
-    },
-  ]
-}
+```bash
+docker compose -f docker-compose.ci.yaml --env-file env-example -p ci up --build --exit-code-from api && docker compose -p ci rm -svf
 ```
 
-Start db for local development via development-utils/docker-compose.yml
+## Test benchmarking
 
-```sh
-cd development-utils
-docker-compose up -d
-```
-
-Create .env file based on .env.sample
-
-- Enable `SYNC_MODEL=true` in .env to create database tables if tables are not
-  created yet.
-
-To have a token to try APIs in
-[the swagger](http://localhost:3000/documentation):
-
-- env `GOOGLE_CLIENT_ID` & `GOOGLE_SECRET` must be configured
-- Access the link http://localhost:3000/google/redirect and copy the token
-  returned in the URL.
-
-## Database migrations
-
-### Running Migrations
-
-```
-npm run db:migrate
-```
-
-### Undoing Migrations
-
-```
-npm run db:migrate:undo
-```
-
-### Generate Migration Skeleton
-
-```
-npm run migration:generate <file-name>
+```bash
+docker run --rm jordi/ab -n 100 -c 100 -T application/json -H "Authorization: Bearer USER_TOKEN" -v 2 http://<server_ip>:3000/api/v1/users
 ```

@@ -1,7 +1,5 @@
-node_modules
-npm-debug.log
+/node_modules
+/.data
+/dist
+/files
 .env
-coverage
-README.md
-Dockerfile*
-dist

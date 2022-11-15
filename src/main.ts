@@ -1,38 +1,37 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { Logger } from 'nestjs-pino';
-
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
-import { AllExceptionsFilter } from './shared/exceptions/filters/all-exceptions.filter';
-import { setupSwagger } from './swagger';
+import { SerializerInterceptor } from './utils/serializer.interceptor';
+import validationOptions from './utils/validation-options';
 
 async function bootstrap() {
-  const origins = process.env.CORS_ALLOWED_ORIGINS || /^(.*)/;
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { cors: true });
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+  const configService = app.get(ConfigService);
 
-  app.useLogger(app.get(Logger));
-
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.useGlobalFilters(new AllExceptionsFilter());
-  app.enableCors({
-    origin: [origins],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: true,
-  });
-
-  app.setGlobalPrefix(process.env.API_GLOBAL_PREFIX || '');
-
-  // Starts listening for shutdown hooks
   app.enableShutdownHooks();
+  app.setGlobalPrefix(configService.get('app.apiPrefix'), {
+    exclude: ['/'],
+  });
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
+  app.useGlobalInterceptors(new SerializerInterceptor());
+  app.useGlobalPipes(new ValidationPipe(validationOptions));
 
-  if (process.env.NODE_ENV !== 'production') {
-    setupSwagger(app);
-  }
+  const options = new DocumentBuilder()
+    .setTitle('API')
+    .setDescription('API docs')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
 
-  const port = +process.env.API_PORT || 3000;
-  await app.listen(port);
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('docs', app, document);
+
+  await app.listen(configService.get('app.port'));
 }
-
-bootstrap();
+void bootstrap();
