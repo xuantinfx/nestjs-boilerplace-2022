@@ -10,7 +10,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 // import { MailConfigService } from './mail/mail-config.service';
-import { ForgotModule } from './forgot/forgot.module';
 // import { MailModule } from './mail/mail.module';
 import { HomeModule } from './home/home.module';
 import { DataSource } from 'typeorm';
@@ -39,7 +38,6 @@ import { DataSource } from 'typeorm';
     // }),
     UsersModule,
     AuthModule,
-    ForgotModule,
     // MailModule,
     HomeModule,
   ],

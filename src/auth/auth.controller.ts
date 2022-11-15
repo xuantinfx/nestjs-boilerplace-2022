@@ -13,9 +13,7 @@ import {
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
-import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthUpdateDto } from './dto/auth-update.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -50,21 +48,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async confirmEmail(@Body() confirmEmailDto: AuthConfirmEmailDto) {
     return this.service.confirmEmail(confirmEmailDto.hash);
-  }
-
-  @Post('forgot/password')
-  @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body() forgotPasswordDto: AuthForgotPasswordDto) {
-    return this.service.forgotPassword(forgotPasswordDto.email);
-  }
-
-  @Post('reset/password')
-  @HttpCode(HttpStatus.OK)
-  async resetPassword(@Body() resetPasswordDto: AuthResetPasswordDto) {
-    return this.service.resetPassword(
-      resetPasswordDto.hash,
-      resetPasswordDto.password,
-    );
   }
 
   @ApiBearerAuth()
